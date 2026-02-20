@@ -16,7 +16,7 @@ Data and analysis code for **“The neural computations underlying human social 
 - SocialGNN  
 - SIMPLE   
 - Motion Energy (ME)  
-- VisualRNN 
+- VisualRNN (referred to as ControlRNN in the paper)
 
 ---
 ## ⚙️ Environment Setup
