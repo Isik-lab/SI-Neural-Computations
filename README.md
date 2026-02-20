@@ -84,4 +84,4 @@ python standardRSA_plotWholebrainGroupMaps.py
 Supplementary analyses in one Jupyter notebook?
 
 ---
-For questions/issues: 👩‍💻 mmalik16@jhu.edu
+### For questions/issues: 👩‍💻 mmalik16@jhu.edu
