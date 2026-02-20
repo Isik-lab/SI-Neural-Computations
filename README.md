@@ -1,4 +1,4 @@
-# SI–Neural–Computations
+# SI-Neural-Computations
 
 Data and analysis code for **“The neural computations underlying human social evaluations from visual input.”**
 
