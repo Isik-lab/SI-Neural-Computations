@@ -2,10 +2,10 @@
 
 Data and analysis code for **“The neural computations underlying human social evaluations from visual input.”**
 
-📄 Preprint: *[link]*  
+📄 Preprint: https://doi.org/10.64898/2026.02.20.707082  
 📌 Preregistration: https://osf.io/hq3r7  
 
-### (_❗️Repository is under construction ⚒️_)
+#### (_❗️Repository is under construction ⚒️_)
 ---
 ## Data
 - 🧠 **fMRI**
