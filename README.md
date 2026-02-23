@@ -1,6 +1,6 @@
 # SI-Neural-Computations
 
-Data and analysis code for **“The neural computations underlying human social evaluations from visual input.”**
+Data and analysis code for **“Bottom-up and generative computations uniquely explain neural responses across the social brain”**
 
 📄 Preprint: https://doi.org/10.64898/2026.02.20.707082  
 📌 Preregistration: https://osf.io/hq3r7  
