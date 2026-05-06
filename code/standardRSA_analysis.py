@@ -72,7 +72,7 @@ def load_features(features2test = [], sub_ids = None):
 
 
 	if 'HR' in features2test:
-	    with open('../derivatives/model_&_behavioural_representations/human_rating_labels_all_genset', 'rb') as file:
+	    with open('../derivatives/model_&_behavioural_representations/HR/human_rating_labels_all_genset', 'rb') as file:
 	        human_ratings_all = pd.read_pickle(file)
 	        human_ratings_all_dict = human_ratings_all.to_dict()
 
