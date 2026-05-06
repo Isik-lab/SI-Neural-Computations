@@ -22,11 +22,11 @@ Data and analysis code for **“Bottom-up and generative computations uniquely e
 ---
 ## ⚙️ Environment Setup
 All analyses were run using the Conda environment defined in:
-```fMRI_analysis_env.yml```
+```env_macOS_fMRI_analysis.yml```
 
 Create the environment:
 ```
-conda env create -f fMRI_analysis_env.yml
+conda env create -f env_macOS_fMRI_analysis.yml
 conda activate fMRI_analysis
 ```
 
@@ -52,19 +52,21 @@ python createROIs.py
 python standardRSA_analysis.py \
 --mode ROI \
 --features SocialGNN10s_trained10s SIMPLE10s HR ME10s VisualRNN10s
+--roi  ('sipsts', 'psts_r') ('tom', 'tpj_r')
 ```
 #### 3.2 ROI-based RSA — Unique Variance
 ```
 python standardRSA_analysis.py \
 --mode ROIuniqvar \
 --features SocialGNN10s_trained10s SIMPLE10s HR ME10s VisualRNN10s
+--roi  ('sipsts', 'psts_r') ('tom', 'tpj_r')
 ```
 
 #### 3.3 Whole-Brain Searchlight RSA (computationally intensive)
 ```
 python standardRSA_analysis.py \
 --mode wholebrain \
---features SocialGNN10s_trained10s SIMPLE10s HR ME10s VisualRNN10s
+--features SocialGNN10s_trained10s SIMPLE10s HR ME10s_reduced VisualRNN10s
 ```
 
 #### 3.4 Whole-Brain Searchlight — Unique Variance
@@ -74,7 +76,9 @@ python standardRSA_analysis.py --mode wholebrain_uniqvar
 
 #### 3.5 Group-Level Whole-Brain Plots (computationally intensive)
 ```
-python standardRSA_plotWholebrainGroupMaps.py
+python standardRSA_plotWholebrainGroupMaps.py \
+--features2test HR SocialGNN10s_trained10s SIMPLE10s ME10s_reduced VisualRNN10s\
+--sr_comparisons SocialGNN10s_trained10s,SIMPLE10s
 ```
 
 ### 4️⃣ Time-Resolved Analyses
