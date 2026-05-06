@@ -13,9 +13,6 @@ from tqdm import tqdm
 import argparse
 
 # ==== CONFIGURATION ====
-# ==== CONFIGURATION ====
-import argparse
-
 parser = argparse.ArgumentParser()
 
 parser.add_argument("--thres", type=float, default=1.96)
