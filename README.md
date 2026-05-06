@@ -66,7 +66,7 @@ python standardRSA_analysis.py \
 ```
 python standardRSA_analysis.py \
 --mode wholebrain \
---features SocialGNN10s_trained10s SIMPLE10s HR ME10s VisualRNN10s
+--features SocialGNN10s_trained10s SIMPLE10s HR ME10s_reduced VisualRNN10s
 ```
 
 #### 3.4 Whole-Brain Searchlight — Unique Variance
@@ -76,7 +76,9 @@ python standardRSA_analysis.py --mode wholebrain_uniqvar
 
 #### 3.5 Group-Level Whole-Brain Plots (computationally intensive)
 ```
-python standardRSA_plotWholebrainGroupMaps.py
+python standardRSA_plotWholebrainGroupMaps.py \
+--features2test HR SocialGNN10s_trained10s SIMPLE10s ME10s_reduced VisualRNN10s\
+--sr_comparisons SocialGNN10s_trained10s,SIMPLE10s
 ```
 
 ### 4️⃣ Time-Resolved Analyses
