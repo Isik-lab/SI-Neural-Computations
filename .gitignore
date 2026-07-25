@@ -1,0 +1,9 @@
+# Raw BIDS subject data — stored on OpenNeuro
+/sub-*/
+
+# Ignore all derivatives except model/behavioral representations
+/derivatives/*
+!/derivatives/model_&_behavioural_representations/
+!/derivatives/model_&_behavioural_representations/**
+
+/derivatives/model_&_behavioural_representations/ME/motion_energies_test_middle10s
