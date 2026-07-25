@@ -19,6 +19,10 @@ Data and analysis code for **“Bottom-up and generative computations uniquely e
 - Motion Energy (ME)  
 - VisualRNN (referred to as ControlRNN in the paper)
 
+The representations used in the RSA analyses can be found under:
+```derivatives/model_&_behavioral_representations/```
+Note that the motion energy representation are stored as a zip. Uncompress it after cloning the repo!
+
 ---
 ## ⚙️ Environment Setup
 All analyses were run using the Conda environment defined in:
