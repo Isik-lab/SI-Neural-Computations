@@ -167,7 +167,7 @@ class SubTrialsProcessor:
         reliability_img = nib.Nifti1Image(reliability_3d, affine=ref_img.affine, header=ref_img.header)
         pval_img = nib.Nifti1Image(pval_3d, affine=ref_img.affine, header=ref_img.header)
 
-        reliability_dir = f"../derivatives/nilearn_analysis/reliability/chunks"
+        reliability_dir = f"../derivatives/analyses/reliability/chunks"
         os.makedirs(reliability_dir, exist_ok=True)
 
         suffix = "_betasnormalize-True" if self.betas_normalize else "_betasnormalize-False"
