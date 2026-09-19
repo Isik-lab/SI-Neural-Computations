@@ -11,6 +11,7 @@
 /README_openneuro.md
 /derivatives/fmriprep/
 /derivatives/GLMsingle/
+/derivatives/GLMsingle_2schunks/
 
 # Some other stuff
 /derivatives/localizer_parcelmaps/
