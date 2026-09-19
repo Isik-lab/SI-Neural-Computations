@@ -550,7 +550,7 @@ if __name__ == "__main__":
     ('tom','dmpfc'), ('tom','mmpfc'),('tom','vmpfc'), (None, 'evc')] #note that after running create_rois, or if loading existing rois, roi names become name_l/r
     # Physics ROI requires physics GLMsingle outputs, which are not included in the public release. Add ('physics', 'physics_pramod') above if available.
 
-    overwrite = False
+    overwrite = True
 
     split_half_r, split_half_rsa, split_half_rsa_withinreliable = {}, {}, {}
     for sub_id in sub_ids:

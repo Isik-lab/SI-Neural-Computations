@@ -124,6 +124,9 @@ python standardRSA_plotWholebrainGroupMaps.py \
 ### 4️⃣ Time-Resolved Analyses
 - GLM fitting
 - Time-resolved RSA
+python standardRSA_analysis_2schunks.py \
+    --mode ROIuniqvar \
+    --features SocialGNN10s_trained10s SIMPLE10s
 
 ## 📚 Supplementary Analyses
 Supplementary analyses in one Jupyter notebook?

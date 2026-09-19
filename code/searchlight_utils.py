@@ -63,3 +63,27 @@ def process_voxel_uniqvar(args):
         return x, y, z, sr1, sr2
 
     return x, y, z, np.nan, np.nan
+
+def process_voxel_multi_semipartial(args):
+    x, y, z, fmri_img, mask_img, radius, target_rdm, covar_rdms = args
+
+    if not mask_img.get_fdata()[x, y, z]:
+        return x, y, z, np.nan
+
+    sphere_mask = create_sphere((x, y, z), radius, fmri_img.shape[:3])
+    sphere_data = fmri_img.get_fdata()[sphere_mask]
+    neural_rdm = compute_rdm(sphere_data.T)
+
+    if np.sum(~np.isnan(neural_rdm)) < 3:
+        return x, y, z, np.nan
+
+    data_dict = {'X': neural_rdm, 'Y': target_rdm}
+    covar_cols = [f'C{i}' for i in range(len(covar_rdms))]
+    data_dict.update({col: covar for col, covar in zip(covar_cols, covar_rdms)})
+    data = pd.DataFrame(data_dict).dropna()
+
+    if len(data) < 3:
+        return x, y, z, np.nan
+
+    r = pg.partial_corr(data=data, x='X', y='Y', y_covar=covar_cols, method='spearman')['r'].iloc[0]
+    return x, y, z, r

@@ -324,8 +324,19 @@ def parse_args():
     	default=['evc_l', 'evc_r', 'mt_l', 'mt_r', 'psts_l', 'psts_r', 'tpj_l', 'tpj_r'],
     	help="List of ROIs to test.")
     parser.add_argument('--sr_comparisons', nargs='*',default=['SocialGNN10s_trained10s,SIMPLE10s'],
-    	help="Model pairs for whole-brain unique-variance RSA, e.g. SocialGNN10s_trained10s,SIMPLE10s HR,ME10s_reduced")
+    	help="Model pairs for unique-variance RSA, e.g. SocialGNN10s_trained10s,SIMPLE10s HR,ME10s_reduced")
     return parser.parse_args()
+
+def parse_sr_comparisons(sr_comparisons):
+    comparisons = []
+    for pair in sr_comparisons:
+        models = pair.split(",")
+        if len(models) != 2:
+            raise ValueError(
+                f"Invalid comparison '{pair}'. Use format MODEL1,MODEL2"
+            )
+        comparisons.append(tuple(models))
+    return comparisons
 
 
 if __name__ == "__main__":
@@ -446,6 +457,9 @@ if __name__ == "__main__":
 	# ROI-wise unique variance RSA mode
 	elif mode == "ROIuniqvar":
 
+		comparisons = parse_sr_comparisons(args.sr_comparisons)
+		comparison_tag = "__".join(f"{feature1}_vs_{feature2}" for feature1, feature2 in comparisons)
+
 		plot_style = "bar"
 
 		roiwise_neural_rdms = get_roiwise_neural_rdms(sub_ids, roi_names, reliable_only=within_reliable)
@@ -464,11 +478,8 @@ if __name__ == "__main__":
 			else:
 				sub_ids_rel = sub_ids
 
-			# Define model comparisons
-			sr_comparisons_rdms = {
-				pair: (comparison_rdms[pair[0]], comparison_rdms[pair[1]])
-				for pair in [('SocialGNN10s_trained10s', 'SIMPLE10s')]
-			}
+			sr_comparisons_rdms = {pair: (comparison_rdms[pair[0]], comparison_rdms[pair[1]])
+		        for pair in comparisons}
 
 			# Run unique variance RSA
 			sr_values = ROI_RSAuniqvar_roiwise(roi_name, sub_ids_rel, roiwise_neural_rdms, sr_comparisons_rdms)
@@ -509,7 +520,7 @@ if __name__ == "__main__":
 		
 		# Save calculated r and p values
 		reliability_suffix = "_withinreliablevoxels" if within_reliable else ""
-		results_file = (f'{rsa_outdir}/roiRSAuniqvar_group{subj_group}{reliability_suffix}_results.pkl')
+		results_file = (f'{rsa_outdir}/roiRSAuniqvar_group{subj_group}_{comparison_tag}{reliability_suffix}_results.pkl')
 		with open(results_file, 'wb') as f:
 		    pickle.dump(roi_results, f)
 		print(f"Saved numerical ROI unique variance RSA results: {results_file}")
@@ -520,7 +531,7 @@ if __name__ == "__main__":
 		fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, 1.02), ncol=9)
 		plt.suptitle("Standard RSA UniqVar Scores", fontsize=16, y=1.03)
 		reliability_suffix = "_withinreliablevoxels" if within_reliable else ""
-		plt.savefig(f'../derivatives/analyses/plots/rsa/group/roiRSAuniqvar_group{subj_group}{reliability_suffix}_{plot_style}.png',
+		plt.savefig(f'../derivatives/analyses/plots/rsa/group/roiRSAuniqvar_group{subj_group}_{comparison_tag}{reliability_suffix}_{plot_style}.png',
 					bbox_inches="tight", dpi=300)
 		plt.show()
 
@@ -559,12 +570,7 @@ if __name__ == "__main__":
 	elif mode == "wholebrain_uniqvar":
 		radius = 3
 		# Model comparisons for unique variance RSA
-		comparisons = []
-		for pair in args.sr_comparisons:
-		    models = pair.split(',')
-		    if len(models) != 2:
-		        raise ValueError(f"Invalid comparison '{pair}'. Use format MODEL1,MODEL2")
-		    comparisons.append(tuple(models))
+		comparisons = parse_sr_comparisons(args.sr_comparisons)
 
 		# Load data
 		beta_images, mask_images = get_wholebrain_neural_data(sub_ids, within_reliable)
