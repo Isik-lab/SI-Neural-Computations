@@ -4,8 +4,6 @@ import numpy as np
 import nibabel as nib
 import h5py
 import pickle
-import glob
-from nilearn import plotting
 from scipy.stats import pearsonr
 import warnings
 warnings.simplefilter("ignore", category=RuntimeWarning) #for warnings during nan slices subtraction in betas
@@ -24,7 +22,7 @@ class SubTrialsProcessor:
         self.beta_type = beta_type
         self.betas_normalize = betas_normalize
 
-        self.output_dir = f"../derivatives/nilearn_analysis/glmsingle_betas/sub-{sub_id}/"
+        self.output_dir = f"../derivatives/analyses/processed_betas/sub-{sub_id}/"
         os.makedirs(self.output_dir, exist_ok=True)
 
         self.beta_string = "TYPED_FITHRF_GLMDENOISE_RR"
@@ -57,10 +55,12 @@ class SubTrialsProcessor:
 
     def _load_event_files(self):
         """Load and concatenate event files for all runs of a task."""
-        event_files = [
-            f"../sub-{self.sub_id}/func/sub-{self.sub_id}_task-{self.task}_run-{run}_events.tsv"
-            for run in self.runs[self.task]
-        ]
+        if self.task == "physics":
+            event_files = [f"../sub-{self.sub_id}/func/sub-{self.sub_id}_task-physics_events.tsv"]
+        else:
+            event_files = [f"../sub-{self.sub_id}/func/sub-{self.sub_id}_task-{self.task}_run-{run}_events.tsv"
+                for run in self.runs[self.task]]
+
         return pd.concat([pd.read_csv(f, sep="\t") for f in event_files], ignore_index=True)
 
     def _process_event_data(self):
@@ -70,7 +70,7 @@ class SubTrialsProcessor:
                 self.trials_df.drop(columns=["identifier"], inplace=True)
             self.trials_df.rename(columns={"trial_type": "identifier"}, inplace=True)
         else:
-            with open("../derivatives/model_&_behavioural_representations/fname_i_dict", "rb") as f:
+            with open("../derivatives/model_and_behavioural_representations/fname_i_dict", "rb") as f:
                 fname_i_dict = pickle.load(f)
             self.trials_df["filename"] = self.trials_df["identifier"].map({v: k for k, v in fname_i_dict.items()})
 
@@ -92,17 +92,24 @@ class SubTrialsProcessor:
         return averaged_betas
 
     def merge_behavioral_responses(self, averaged_betas):
-        """For 'main' task, merge averaged betas with behavioral ratings."""
+        """For 'main' task, merge averaged betas with participant post-scan ratings."""
         if self.task != "main":
             return
-        behavior_file = glob.glob(f"../derivatives/model_&_behavioural_representations/subj_ratings/subj1{self.sub_id[1:]}/behaviouralfiles/*.csv")[0]
-        behavioral_response = pd.read_csv(behavior_file)
+
+        # add movie filename to condition-wise beta dataframe
+        fname_map = self.trials_df[["identifier", "filename"]].drop_duplicates()
+        averaged_betas = averaged_betas.merge(fname_map, on="identifier", how="left")
+
+        # participant-specific post-scan ratings
+        behavior_file = f"../sub-{self.sub_id}/beh/sub-{self.sub_id}_task-postscan_events.tsv"
+        behavioral_response = pd.read_csv(behavior_file, sep="\t")
+
         merged_df = averaged_betas.merge(
-            behavioral_response[["video_name", "response", "movie_path"]],
+            behavioral_response[["stimulus_id", "response"]],
             left_on="identifier",
-            right_on="video_name",
+            right_on="stimulus_id",
             how="inner",
-        )
+        ).drop(columns="stimulus_id")
 
         # Save results
         norm_suffix = "" if self.betas_normalize else "_betasnormalize-False"
@@ -134,6 +141,7 @@ class SubTrialsProcessor:
         nib.save(contrast_image, contrast_filename)
         print(f"File written: {contrast_filename}")
 
+        # saving no-interact vs baseline for localizing MT
         if self.task == "sipsts":
             no_interact_filename = f"{self.output_dir}sub-{self.sub_id}_task-{self.task}_space-{self.space}_stat-{self.task}nointeract.nii.gz"
             no_interact_image = nib.Nifti1Image(averaged_betas.iloc[1]["betas"], affine=mask_image.affine)
@@ -196,7 +204,7 @@ class SubTrialsProcessor:
         reliability_img = nib.Nifti1Image(reliability_3d, affine=ref_img.affine, header=ref_img.header)
         pval_img = nib.Nifti1Image(pval_3d, affine=ref_img.affine, header=ref_img.header)
 
-        reliability_dir = f"../derivatives/nilearn_analysis/reliability"
+        reliability_dir = "../derivatives/analyses/reliability"
         os.makedirs(reliability_dir, exist_ok=True)
 
         suffix = "_betasnormalize-True" if self.betas_normalize else "_betasnormalize-False"
@@ -228,6 +236,11 @@ if __name__ == "__main__":
         valid_tasks = SubTrialsProcessor(sub_id=sub_id, task="main")._get_valid_runs().keys()
         
         for task in valid_tasks:
+            # Physics GLMsingle outputs are not included in the public release.
+            # Remove this condition to process physics if those outputs are available.
+            if task == "physics":
+                continue
+
             print(f"\nProcessing sub-{sub_id}, task-{task}")
             processor = SubTrialsProcessor(sub_id=sub_id, task=task)
             processor.process()

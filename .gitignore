@@ -1,9 +1,30 @@
-# Raw BIDS subject data — stored on OpenNeuro
+# ---------------------------------
+# OpenNeuro / BIDS dataset
+# Stored publicly on OpenNeuro
+# ---------------------------------
+
 /sub-*/
+/derivatives/
+/stimuli/
 
-# Ignore all derivatives except model/behavioral representations
-/derivatives/*
-!/derivatives/model_&_behavioural_representations/
-!/derivatives/model_&_behavioural_representations/**
+/dataset_description.json
+/participants.tsv
+/participants.json
+/task-postscan_events.json
 
-/derivatives/model_&_behavioural_representations/ME/motion_energies_test_middle10s
+/README_openneuro.md
+/derivatives/localizer_parcelmaps/
+/derivatives/analyses/
+
+# ---------------------------------
+# Large derived model files
+# ---------------------------------
+
+/model_&_behavioural_representations/ME/motion_energies_test_middle10s
+
+
+# ---------------------------------
+# macOS
+# ---------------------------------
+
+.DS_Store

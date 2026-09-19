@@ -143,11 +143,11 @@ class ROI:
     def _load_sublocalizer(self):
         # Load the subject's localizer file based on the parcel and task
         if self.parcel_name == "mt":
-            return nib.load(f'../derivatives/nilearn_analysis/glmsingle_betas/sub-{self.sub_id}/sub-{self.sub_id}_task-{self.task}_space-{self.space}_stat-{self.task}nointeract.nii.gz')
+            return nib.load(f'../derivatives/analyses/processed_betas/sub-{self.sub_id}/sub-{self.sub_id}_task-{self.task}_space-{self.space}_stat-{self.task}nointeract.nii.gz')
         elif self.task is None:
-            return nib.load(f'../derivatives/nilearn_analysis/glmsingle_betas/sub-{self.sub_id}/sub-{self.sub_id}_task-sipsts_space-{self.space}_stat-sipstscontrast.nii.gz')
+            return nib.load(f'../derivatives/analyses/processed_betas/sub-{self.sub_id}/sub-{self.sub_id}_task-sipsts_space-{self.space}_stat-sipstscontrast.nii.gz')
         else:
-            return nib.load(f'../derivatives/nilearn_analysis/glmsingle_betas/sub-{self.sub_id}/sub-{self.sub_id}_task-{self.task}_space-{self.space}_stat-{self.task}contrast.nii.gz')
+            return nib.load(f'../derivatives/analyses/processed_betas/sub-{self.sub_id}/sub-{self.sub_id}_task-{self.task}_space-{self.space}_stat-{self.task}contrast.nii.gz')
 
     def _combine_parcel_localizer(self):
         # If the parcel is split into left and right hemispheres
@@ -290,7 +290,10 @@ class SubjROIs:
 
     def save_subjROIs(self):
         # Save subject masks for this subject
-        out_f = f'../derivatives/nilearn_analysis/glmsingle_betas/sub-{self.sub_id}/sub-{self.sub_id}_space-{self.space}_topperc-{self.top_perc}_desc-subjectrois'
+        out_dir = f'../derivatives/analyses/rois/sub-{self.sub_id}/'
+        os.makedirs(out_dir, exist_ok=True)
+
+        out_f = (f'{out_dir}sub-{self.sub_id}_space-{self.space}_topperc-{self.top_perc}_desc-subjectrois')
 
         if not os.path.isfile(out_f) or self.overwrite:
             with open(out_f, 'wb') as f:
@@ -298,7 +301,7 @@ class SubjROIs:
             print(f"File written: {out_f}")
 
     def load_saved_rois(self):
-        in_f = f'../derivatives/nilearn_analysis/glmsingle_betas/sub-{self.sub_id}/sub-{self.sub_id}_space-{self.space}_topperc-{self.top_perc}_desc-subjectrois'
+        in_f = f'../derivatives/analyses/rois/sub-{self.sub_id}/sub-{self.sub_id}_space-{self.space}_topperc-{self.top_perc}_desc-subjectrois'
         with open(in_f, 'rb') as f:
             self.subjROIs = pickle.load(f)
 
@@ -386,7 +389,7 @@ class SubjROIs:
 
     def compute_split_half_reliability(self):
         # Load trial data for each subject
-        with open(f'../derivatives/nilearn_analysis/glmsingle_betas/sub-{self.sub_id}/sub-{self.sub_id}_task-main_space-{self.space}_stat-alltrialsdf', 'rb') as f:
+        with open(f'../derivatives/analyses/processed_betas/sub-{self.sub_id}/sub-{self.sub_id}_task-main_space-{self.space}_stat-alltrialsdf', 'rb') as f:
             trials_df = pickle.load(f) 
             trials_df = trials_df[trials_df.trial_type == "experimental_trial"]
 
@@ -437,7 +440,7 @@ class SubjROIs:
 
     def compute_split_half_RSA(self, within_reliable = None):
         # Load trial data
-        with open(f'../derivatives/nilearn_analysis/glmsingle_betas/sub-{self.sub_id}/sub-{self.sub_id}_task-main_space-{self.space}_stat-alltrialsdf', 'rb') as f:
+        with open(f'../derivatives/analyses/processed_betas/sub-{self.sub_id}/sub-{self.sub_id}_task-main_space-{self.space}_stat-alltrialsdf', 'rb') as f:
             trials_df = pickle.load(f) 
             trials_df = trials_df[trials_df.trial_type == "experimental_trial"]
 
@@ -545,7 +548,8 @@ if __name__ == "__main__":
         sub_ids = ["P01", "P02", "P04", "P07", "M01"]
 
     roi_names = [('sipsts','asts'), ('sipsts','psts'), ('tom','tpj'), ("sipsts",'mt'), 
-    ('tom','dmpfc'), ('tom','mmpfc'),('tom','vmpfc'), (None, 'v1'), ('physics', 'physics_pramod')] #note that after running create_rois, or if loading existing rois, roi names become name_l/r
+    ('tom','dmpfc'), ('tom','mmpfc'),('tom','vmpfc'), (None, 'v1')] #note that after running create_rois, or if loading existing rois, roi names become name_l/r
+    # Physics ROI requires physics GLMsingle outputs, which are not included in the public release. Add ('physics', 'physics_pramod') above if available.
 
     overwrite = False
 
@@ -563,16 +567,16 @@ if __name__ == "__main__":
         split_half_rsa[sub_id] = subjROIs.compute_split_half_RSA()
         
 
-    with open(f'../derivatives/nilearn_analysis/reliability/{subj_group}set_roiwise_splithalfreliability', 'wb') as f:
+    with open(f'../derivatives/analyses/reliability/{subj_group}set_roiwise_splithalfreliability', 'wb') as f:
         pickle.dump(split_half_r, f)
-    with open(f'../derivatives/nilearn_analysis/reliability/{subj_group}set_roiwise_splithalfrsa_withinreliable', 'wb') as f:
+    with open(f'../derivatives/analyses/reliability/{subj_group}set_roiwise_splithalfrsa_withinreliable', 'wb') as f:
         pickle.dump(split_half_rsa_withinreliable, f)
-    with open(f'../derivatives/nilearn_analysis/reliability/{subj_group}set_roiwise_splithalfrsa', 'wb') as f:
+    with open(f'../derivatives/analyses/reliability/{subj_group}set_roiwise_splithalfrsa', 'wb') as f:
         pickle.dump(split_half_rsa, f)
 
 
     # Make reliability plots
-    outdir = '../derivatives/plots/reliability/group'
+    outdir = '../derivatives/analyses/plots/reliability/group'
     os.makedirs(outdir, exist_ok=True)
 
     fig, ax = plt.subplots(figsize=(10, 6))
