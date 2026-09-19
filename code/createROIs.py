@@ -8,7 +8,6 @@ from nilearn import plotting
 from nilearn.image import new_img_like, resample_to_img
 import numpy as np
 from general_utils import mask_img, plot_on_surf, get_rdm, load_reliability_mask
-import warnings
 import pickle
 import os.path
 import matplotlib.pyplot as plt
@@ -18,6 +17,10 @@ from scipy.stats import pearsonr, spearmanr
 import copy
 from roi_utils import make_roiwise_boxplot
 import seaborn as sns
+
+import warnings
+warnings.simplefilter("ignore", category=RuntimeWarning) #for warnings during nan slices subtraction in betas
+
 
 class ROI:
     """
@@ -114,7 +117,7 @@ class ROI:
                     parcel_data = parcel[hemi].get_fdata()
                     binary_data = np.where(parcel_data > 0, 1, 0)
                     parcel[hemi] = nib.Nifti1Image(binary_data, parcel[hemi].affine, parcel[hemi].header)
-        elif self.parcel_name == "v1":
+        elif self.parcel_name == "evc":
             for hemi in ['l', 'r']:
                 # Load and resample the parcels
                 v1v = load_and_resample(base_paths['v1v'], hemi)
@@ -199,7 +202,7 @@ class ROI:
 
     def create_ROI(self):
         # Combine the parcel and localizer information to create an ROI mask using the top percentage threshold
-        if self.parcel_name == 'v1':
+        if self.parcel_name == 'evc':
             roi = self.parcel
         else:
             roi = self._combine_parcel_localizer()
@@ -261,7 +264,7 @@ class SubjROIs:
             except FileNotFoundError:
                 self.create_rois()
                 self.save_subjROIs()
-                print(f"{self.sub_id}: Created and saved ROIs (no existing files found)")
+                print(f"{self.sub_id}: Created and saved ROIs")
 
     def create_rois(self, plot_mode=None):
         print(f"\n{self.sub_id}")
@@ -535,10 +538,6 @@ class SubjROIs:
         return roi_repr
 
 
-
-import warnings
-warnings.simplefilter("ignore", category=RuntimeWarning) #for warnings during nan slices subtraction in betas
-
 if __name__ == "__main__":
 
     subj_group = "M"
@@ -548,7 +547,7 @@ if __name__ == "__main__":
         sub_ids = ["P01", "P02", "P04", "P07", "M01"]
 
     roi_names = [('sipsts','asts'), ('sipsts','psts'), ('tom','tpj'), ("sipsts",'mt'), 
-    ('tom','dmpfc'), ('tom','mmpfc'),('tom','vmpfc'), (None, 'v1')] #note that after running create_rois, or if loading existing rois, roi names become name_l/r
+    ('tom','dmpfc'), ('tom','mmpfc'),('tom','vmpfc'), (None, 'evc')] #note that after running create_rois, or if loading existing rois, roi names become name_l/r
     # Physics ROI requires physics GLMsingle outputs, which are not included in the public release. Add ('physics', 'physics_pramod') above if available.
 
     overwrite = False

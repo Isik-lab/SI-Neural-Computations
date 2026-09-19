@@ -1,8 +1,5 @@
-# ---------------------------------
-# OpenNeuro / BIDS dataset
-# Stored publicly on OpenNeuro
-# ---------------------------------
 
+# Stuff on OpenNeuro
 /sub-*/
 /stimuli/
 
@@ -14,14 +11,13 @@
 /README_openneuro.md
 /derivatives/fmriprep/
 /derivatives/GLMsingle/
+
+# Some other stuff
 /derivatives/localizer_parcelmaps/
-/derivatives/analyses/
+/derivatives/analyses/processed_betas/*/*stat-alltrialsdf
+
 # file too large so upload only zip version
 /derivatives/model_and_behavioural_representations/ME/motion_energies_test_middle10s 
 
-
-# ---------------------------------
-# macOS
-# ---------------------------------
-
+# macOS files
 .DS_Store

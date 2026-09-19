@@ -194,8 +194,8 @@ def main():
     parser.add_argument('--fracridge', action='store_true')
     parser.add_argument('--no-fracridge', dest='fracridge', action='store_false')
     parser.set_defaults(fracridge=True)
-    parser.add_argument('--bids_dir', type=str, default='/home/mmalik16/data-lisik3/manasimalik/SI_Comp_fMRI/fMRI_data')
-    parser.add_argument('--out_dir', type=str, default='/home/mmalik16/data-lisik3/manasimalik/SI_Comp_fMRI/fMRI_data/derivatives/GLMsingle_2schunks')
+    parser.add_argument('--bids_dir', type=str, default='../../')
+    parser.add_argument('--out_dir', type=str, default='../../derivatives/GLMsingle_2schunks')
 
     args = parser.parse_args()
     GLM(args).run()

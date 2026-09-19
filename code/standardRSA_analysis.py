@@ -7,7 +7,6 @@ from tqdm import tqdm
 import itertools
 from multiprocessing import Pool
 import os
-import glob
 from statsmodels.stats.multitest import multipletests
 import argparse
 
@@ -21,10 +20,10 @@ def load_features(features2test = [], sub_ids = None):
 		Handles both subject-specific and global features """
 
 	# Load video names order to order the features
-	with open('../derivatives/model_&_behavioural_representations/fname_i_dict', "rb") as f:
+	with open('../derivatives/model_and_behavioural_representations/fname_i_dict', "rb") as f:
 		fname_i_dict = pickle.load(f)
 		i_fname_dict = {v: k for k, v in fname_i_dict.items()}
-	with open(f'../derivatives/nilearn_analysis/glmsingle_betas/sub-M30/sub-M30_task-main_space-MNI152NLin2009cAsym_stat-conditionwise', "rb") as f:
+	with open(f'../derivatives/analyses/processed_betas/sub-M30/sub-M30_task-main_space-MNI152NLin2009cAsym_stat-conditionwise', "rb") as f:
 		df = pickle.load(f)
 	video_names_inorder = df['identifier'].map(i_fname_dict).to_list()
 
@@ -35,7 +34,7 @@ def load_features(features2test = [], sub_ids = None):
 	if 'ME10s_reduced' in features2test:
 	    from sklearn.decomposition import PCA
 	    from sklearn.preprocessing import StandardScaler
-	    with open("../derivatives/model_&_behavioural_representations/ME/motion_energies_test_middle10s", "rb") as f:
+	    with open("../derivatives/model_and_behavioural_representations/ME/motion_energies_test_middle10s", "rb") as f:
 	            motion_energies = pickle.load(f)
 
 	    motion_energies = {k[:23]:v for k,v in motion_energies.items()}
@@ -53,7 +52,7 @@ def load_features(features2test = [], sub_ids = None):
 	    pca = PCA(n_components=n_components, svd_solver='randomized', whiten=False)
 	    X_all_pca = pca.fit_transform(X_all_std)
 
-	    print("Explained variance ratio (cumulative):", np.cumsum(pca.explained_variance_ratio_)[-1])
+	    #print("Explained variance ratio (cumulative):", np.cumsum(pca.explained_variance_ratio_)[-1])
 
 	    motion_energies_inorder_reduced = X_all_pca.reshape(50, 200, n_components)
 	    
@@ -65,14 +64,14 @@ def load_features(features2test = [], sub_ids = None):
 	    mapping = {'Friendly': [1, 0, 0], 'Neutral': [0, 1, 0], 'Adversarial': [0, 0, 1], 'InvalidResponse': [0, 0, 0], 'NoResponse': [0, 0, 0]}
 
 	    for sub_id in sub_ids:     
-	        with open(f'../derivatives/nilearn_analysis/glmsingle_betas/sub-{sub_id}/sub-{sub_id}_task-main_space-MNI152NLin2009cAsym_stat-conditionwise', "rb") as f:
+	        with open(f'../derivatives/analyses/processed_betas/sub-{sub_id}/sub-{sub_id}_task-main_space-MNI152NLin2009cAsym_stat-conditionwise', "rb") as f:
 	            df = pickle.load(f)
 
 	        features['subj_ratings'][sub_id] = np.array(df['response'].map(mapping).to_list())
 
 
 	if 'HR' in features2test:
-	    with open('../derivatives/model_&_behavioural_representations/HR/human_rating_labels_all_genset', 'rb') as file:
+	    with open('../derivatives/model_and_behavioural_representations/HR/human_rating_labels_all_genset', 'rb') as file:
 	        human_ratings_all = pd.read_pickle(file)
 	        human_ratings_all_dict = human_ratings_all.to_dict()
 
@@ -95,12 +94,8 @@ def load_features(features2test = [], sub_ids = None):
 
 	    features['HR'] = np.array(HR)
 
-	if 'HR_PHASE_pg' in features2test: #FIX THIS: create it here instead of using presaved?
-		with open('../derivatives/model_&_behavioural_representations/HR_PHASE_pg_features', 'rb') as f:
-			features['HR_PHASE_pg'] = np.array(pickle.load(f))
-
 	if 'SocialGNN10s_trained10s' in features2test:
-	    with open('../derivatives/model_&_behavioural_representations/SocialGNN/RNN_activations_PHASE_originalsplit_middle10s_contextTrue_20240220_SocialGNN_E_originalsplit_middle10s_21-02-2024', "rb") as f:
+	    with open('../derivatives/model_and_behavioural_representations/SocialGNN/RNN_activations_PHASE_originalsplit_middle10s_contextTrue_20240220_SocialGNN_E_originalsplit_middle10s_21-02-2024', "rb") as f:
 	        SocialGNN_act = pickle.load(f)
 	    
 	    # Order correct and keep only chosen 50 videos
@@ -112,7 +107,7 @@ def load_features(features2test = [], sub_ids = None):
 
 	    
 	if 'SIMPLE10s' in features2test:
-	    with open('../derivatives/model_&_behavioural_representations/SIMPLE/SIMPLE_probabilities_test10s_origbeliefs_MMcode_run3_9Sept24', "rb") as f:
+	    with open('../derivatives/model_and_behavioural_representations/SIMPLE/SIMPLE_probabilities_test10s_origbeliefs_MMcode_run3_9Sept24', "rb") as f:
 	        probs_relations_all = pickle.load(f)
 
 	    SIMPLE_genset10s = {}
@@ -133,7 +128,7 @@ def load_features(features2test = [], sub_ids = None):
 	    features['SIMPLE10s'] = np.array(SIMPLE10s_repr)
 
 	if 'SIMPLE10s_goals' in features2test:
-		with open('../derivatives/model_&_behavioural_representations/SIMPLE/SIMPLE_probabilities_test10s_origbeliefs_MMcode_run3_9Sept24', "rb") as f:
+		with open('../derivatives/model_and_behavioural_representations/SIMPLE/SIMPLE_probabilities_test10s_origbeliefs_MMcode_run3_9Sept24', "rb") as f:
 		    _ = pickle.load(f)
 		    probs_goals_all = pickle.load(f)
 
@@ -171,46 +166,13 @@ def load_features(features2test = [], sub_ids = None):
 		features['SIMPLE10s_goals'] = np.array(SIMPLE_goals_repr)
 
 	if 'SIMPLE10s_proposalsdists' in features2test:
-		from general_utils import parse_video_to_propoposal_dists
+		with open('../derivatives/model_and_behavioural_representations/SIMPLE/SIMPLE_proposal_dists_test10s_origbeliefs_MMcode_run3.pkl','rb') as f:
+			SIMPLE_dist_all = pickle.load(f)
 
-		folder = "/Users/mmalik16/Downloads/SocialGNN/SIMPLE-new-main/record/test10s_origbeliefs_MMcode_run3/" 
-		pattern = os.path.join(folder, "*sim*.pik")
-
-		ABSTRACT_GOAL_LABELS = {
-		    1: [
-		        'go to landmark',
-		        'take object to landmark',
-		        'help green agent',
-		        'hinder green agent',
-		        'get to green agent',
-		        'get away from green agent'
-		    ],
-		    2: [
-		        'go to landmark',
-		        'take object to landmark',
-		        'help red agent',
-		        'hinder red agent',
-		        'get to red agent',
-		        'get away from red agent'
-		    ]
-		}
-
-		SIMPLE_dist_all = {}
-		for file_path in glob.glob(pattern):
-		    with open(file_path, "rb") as f:
-		        t = pickle.load(f)
-		        id = file_path.split("/")[-1][:23]
-		        SIMPLE_dist_all[id] = parse_video_to_propoposal_dists(t['dist_all'], ABSTRACT_GOAL_LABELS)
-
-		SIMPLE_dists_repr = []
-		for i,x in enumerate(video_names_inorder):
-		    temp = SIMPLE_dist_all[x[:23]]
-		    SIMPLE_dists_repr.append(temp)
-
-		features['SIMPLE10s_proposalsdists'] = np.array(SIMPLE_dists_repr)
+		features['SIMPLE10s_proposalsdists'] = np.array([SIMPLE_dist_all[x[:23]] for x in video_names_inorder])
 
 	if 'VisualRNN10s' in features2test:
-	    with open('../derivatives/model_&_behavioural_representations/VisualRNN/RNN_activations_PHASE_originalsplit_middle10s_contextTrue_20250407_CueBasedLSTM_originalsplit_middle10s_07-04-2025', "rb") as f:
+	    with open('../derivatives/model_and_behavioural_representations/VisualRNN/RNN_activations_PHASE_originalsplit_middle10s_contextTrue_20250407_CueBasedLSTM_originalsplit_middle10s_07-04-2025', "rb") as f:
 	        VisualRNN_act = pickle.load(f)
 	    
 	    # Order correct and keep only chosen 50 videos
@@ -222,7 +184,7 @@ def load_features(features2test = [], sub_ids = None):
 
 
 	if 'SocialGNN10s_trained10s_classifier' in features2test:
-	    with open('../derivatives/model_&_behavioural_representations/SocialGNN/classifier_activations_PHASE_originalsplit_middle10s_contextTrue_20240220_SocialGNN_E_originalsplit_middle10s_08-04-2025', "rb") as f:
+	    with open('../derivatives/model_and_behavioural_representations/SocialGNN/classifier_activations_PHASE_originalsplit_middle10s_contextTrue_20240220_SocialGNN_E_originalsplit_middle10s_08-04-2025', "rb") as f:
 	        SocialGNN_act = pickle.load(f)
 	    
 	    # Order correct and keep only chosen 50 videos
@@ -256,7 +218,7 @@ def load_conditionwise_betas(sub_ids, mode = None):
 	betas_4d_dict = {}
 	valid_voxels_mask = {}
 	for sub_id in sub_ids:
-	    with open(f'../derivatives/nilearn_analysis/glmsingle_betas/sub-{sub_id}/sub-{sub_id}_task-main_space-MNI152NLin2009cAsym_stat-conditionwise', "rb") as f:
+	    with open(f'../derivatives/analyses/processed_betas/sub-{sub_id}/sub-{sub_id}_task-main_space-MNI152NLin2009cAsym_stat-conditionwise', "rb") as f:
 	        df = pickle.load(f)
 
 	    mask_image = nib.load(f'../derivatives/fmriprep/sub-{sub_id}/func/sub-{sub_id}_task-main_run-1_space-MNI152NLin2009cAsym_desc-brain_mask.nii.gz')
@@ -282,7 +244,7 @@ def get_wholebrain_neural_data(sub_ids, within_reliable=None):
 		# Load all reliability maps
 		reliability_data = []
 		for sub_id in sub_ids:
-		    img = nib.load(f"../derivatives/nilearn_analysis/reliability/sub-{sub_id}_task-main_space-MNI152NLin2009cAsym_desc-betas-fracridge_betasnormalize-True_stat-r_statmap.nii.gz")
+		    img = nib.load(f"../derivatives/analyses/reliability/sub-{sub_id}_task-main_space-MNI152NLin2009cAsym_desc-betas-fracridge_betasnormalize-True_stat-r_statmap.nii.gz")
 		    reliability_data.append(img.get_fdata())
 
 		# Stack into 4D array: (n_subjects, x, y, z) & Average across subjects & keep voxels where group mean r > 0
@@ -352,15 +314,17 @@ def parse_args():
                        help='Do NOT use reliability-masked voxels')
     parser.set_defaults(within_reliable=True)
 
-    parser.add_argument('--mode', type=str, default="ROI", choices=["ROI", "ROIuniqvar", "wholebrain", "wholebrain_uniqvar", "ROImask_on_wholebrain"],
+    parser.add_argument('--mode', type=str, default="ROI", choices=["ROI", "ROIuniqvar", "wholebrain", "wholebrain_uniqvar"],
                         help="Choose which analysis mode to run.")
     parser.add_argument('--features', nargs='*', default=[
         'SocialGNN10s_trained10s', 'SIMPLE10s', 'SIMPLE10s_goals', 'HR', 'VisualRNN10s', 'subj_ratings', 
         'SocialGNN10s_trained10s_classifier', 'ME10s_reduced', 'SIMPLE10s_proposalsdists'
     ], help="List of features to test.")
-    parser.add_argument('--rois', nargs='*', default=roi_names = [(None, "v1_l"), (None, "v1_r"), ("sipsts", 'mt_l'), ("sipsts", 'mt_r'),
-					('sipsts', 'psts_l'), ('sipsts', 'psts_r'), ('tom', 'tpj_l'), ('tom', 'tpj_r'), 
-    ], help="List of ROIs to test.")
+    parser.add_argument('--rois', nargs='*',
+    	default=['evc_l', 'evc_r', 'mt_l', 'mt_r', 'psts_l', 'psts_r', 'tpj_l', 'tpj_r'],
+    	help="List of ROIs to test.")
+    parser.add_argument('--sr_comparisons', nargs='*',default=['SocialGNN10s_trained10s,SIMPLE10s'],
+    	help="Model pairs for whole-brain unique-variance RSA, e.g. SocialGNN10s_trained10s,SIMPLE10s HR,ME10s_reduced")
     return parser.parse_args()
 
 
@@ -377,13 +341,18 @@ if __name__ == "__main__":
 	features2test = args.features
 	within_reliable = args.within_reliable
 	mode = args.mode
-	roi_names = args.rois
+	roi_to_task = {'evc_l': None, 'evc_r': None, 'mt_l': 'sipsts', 'mt_r': 'sipsts', 'psts_l': 'sipsts', 'psts_r': 'sipsts',
+	    'tpj_l': 'tom', 'tpj_r': 'tom', 'dmpfc': 'tom', 'mmpfc': 'tom', 'vmpfc': 'tom',}
+	roi_names = [(roi_to_task[r], r) for r in args.rois]
 
 	# Load feature RDMs and subject neural data
 	features = load_features(features2test, sub_ids)
 	comparison_rdms = get_feature_rdms(features, sub_ids)
 
-	os.makedirs('../derivatives/plots/rsa/group', exist_ok=True)
+	rsa_outdir = '../derivatives/analyses/rsa/group'
+	plot_outdir = '../derivatives/analyses/plots/rsa/group'
+	os.makedirs(rsa_outdir, exist_ok=True)
+	os.makedirs(plot_outdir, exist_ok=True)
 
 	# ROI-wise standard RSA mode
 	if mode == "ROI":
@@ -398,6 +367,7 @@ if __name__ == "__main__":
 		fig, axs = plt.subplots(n, 2, figsize=(14, n*5)) 
 		axs = axs.ravel()
 
+		roi_results = {}
 		diff_p_table = {}
 
 		# Loop through ROIs
@@ -429,8 +399,16 @@ if __name__ == "__main__":
 			diff_p_uncorrected, diff_p_fdr_corrected = signed_permutation_test_with_fdr(diff_r, two_tailed=True)
 			diff_p_table[roi_name] = diff_p_fdr_corrected # Store significant differences
 
+			roi_results[roi_name] = {
+			    'r_values': r_values,
+			    'p_uncorrected': p_uncorrected,
+			    'p_fdr_corrected': p_fdr_corrected,
+			    'diff_p_uncorrected': diff_p_uncorrected,
+			    'diff_p_fdr_corrected': diff_p_fdr_corrected,
+			}
+
 			# Load noise ceiling (split-half RSA values)
-			reliability_path = '../derivatives/nilearn_analysis/reliability/Mset_roiwise_splithalfrsa_withinreliable' if within_reliable else '../derivatives/nilearn_analysis/reliability/Mset_roiwise_splithalfrsa'
+			reliability_path = '../derivatives/analyses/reliability/Mset_roiwise_splithalfrsa_withinreliable' if within_reliable else '../derivatives/analyses/reliability/Mset_roiwise_splithalfrsa'
 			with open(reliability_path, 'rb') as f:
 				split_half_rsa_values = pickle.load(f)
 
@@ -438,13 +416,21 @@ if __name__ == "__main__":
 			make_roiwise_boxplot(r_values, sub_ids_rel, plot_title=roi_name, ax=axs[i], add_noiseceiling=split_half_rsa_values,
 								fdr_pvals=p_fdr_corrected, diff_fdr_pvals=None, visualtype=plot_style)
 
+
+		# Save calculated r and p values
+		reliability_suffix = "_withinreliablevoxels" if within_reliable else ""
+		results_file = (f'{rsa_outdir}/roiRSA_group{subj_group}{reliability_suffix}_results.pkl')
+		with open(results_file, 'wb') as f:
+		    pickle.dump(roi_results, f)
+		print(f"Saved numerical ROI RSA results: {results_file}")
+
 		# Final layout and save
 		handles, labels = axs[0].get_legend_handles_labels()
 		plt.tight_layout()
 		fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, 1.02), ncol=9)
 		plt.suptitle("Standard RSA Scores", fontsize=16, y=1.03)
 		reliability_suffix = "_withinreliablevoxels" if within_reliable else ""
-		plt.savefig(f'../derivatives/plots/rsa/group/roiRSA_group{subj_group}{reliability_suffix}_{plot_style}.png',
+		plt.savefig(f'{plot_outdir}/roiRSA_group{subj_group}{reliability_suffix}_{plot_style}.png',
 					bbox_inches="tight", dpi=300)
 		plt.show()
 
@@ -466,6 +452,8 @@ if __name__ == "__main__":
 		n = int(np.ceil(len(roi_names) / 2))
 		fig, axs = plt.subplots(n, 2, figsize=(10, n * 3))
 		axs = axs.ravel()
+
+		roi_results = {}
 
 		for i, roi_name in enumerate(roi_names):
 			roi_name = roi_name[1]
@@ -498,6 +486,14 @@ if __name__ == "__main__":
 				diff_sr[(f1, f2)] = (r1 - r2)[mask]
 			diff_p_uncorrected, diff_p_fdr_corrected = signed_permutation_test_with_fdr(diff_sr, two_tailed=True)
 
+			roi_results[roi_name] = {
+			    'sr_values': sr_values,
+			    'p_uncorrected': p_uncorrected,
+			    'p_fdr_corrected': p_fdr_corrected,
+			    'diff_p_uncorrected': diff_p_uncorrected,
+			    'diff_p_fdr_corrected': diff_p_fdr_corrected,
+			}
+
 			# Report significant differences
 			print(f"\n{roi_name}")
 			for pair, p in diff_p_fdr_corrected.items():
@@ -506,14 +502,17 @@ if __name__ == "__main__":
 				else:
 					print(p)
 
-			# Load noise ceiling if applicable
-			reliability_path = '../derivatives/nilearn_analysis/reliability/Mset_roiwise_splithalfrsa_withinreliable' if within_reliable else '../derivatives/nilearn_analysis/reliability/Mset_roiwise_splithalfrsa'
-			with open(reliability_path, 'rb') as f:
-				split_half_rsa_values = pickle.load(f)
-
 			# Plot unique variance RSA boxplot
 			make_roiwise_boxplot(sr_values, sub_ids_rel, plot_title=roi_name, ax=axs[i], add_noiseceiling=None,
 								fdr_pvals=p_fdr_corrected, diff_fdr_pvals=None, visualtype=plot_style, ylabel = 'Semipartial Correlation (sr)')
+
+		
+		# Save calculated r and p values
+		reliability_suffix = "_withinreliablevoxels" if within_reliable else ""
+		results_file = (f'{rsa_outdir}/roiRSAuniqvar_group{subj_group}{reliability_suffix}_results.pkl')
+		with open(results_file, 'wb') as f:
+		    pickle.dump(roi_results, f)
+		print(f"Saved numerical ROI unique variance RSA results: {results_file}")
 
 		# Final layout and save
 		handles, labels = axs[0].get_legend_handles_labels()
@@ -521,14 +520,13 @@ if __name__ == "__main__":
 		fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, 1.02), ncol=9)
 		plt.suptitle("Standard RSA UniqVar Scores", fontsize=16, y=1.03)
 		reliability_suffix = "_withinreliablevoxels" if within_reliable else ""
-		plt.savefig(f'../derivatives/plots/rsa/group/roiRSAuniqvar_group{subj_group}{reliability_suffix}_{plot_style}.png',
+		plt.savefig(f'../derivatives/analyses/plots/rsa/group/roiRSAuniqvar_group{subj_group}{reliability_suffix}_{plot_style}.png',
 					bbox_inches="tight", dpi=300)
 		plt.show()
 
 	# Whole-brain RSA searchlight mode
 	elif mode == "wholebrain":
 		radius = 3
-		n_permutations = 0  # Currently unused but placeholder for future tests
 
 		# Load 4D beta images and mask for each subject
 		beta_images, mask_images = get_wholebrain_neural_data(sub_ids, within_reliable)
@@ -551,7 +549,7 @@ if __name__ == "__main__":
 				correlation_img = nib.Nifti1Image(correlation_map, affine=mask.affine)
 
 				# Save result NIfTI image
-				output_dir = f'../derivatives/nilearn_analysis/rsa/sub-{sub_id}/'
+				output_dir = f'../derivatives/analyses/rsa/sub-{sub_id}/'
 				os.makedirs(output_dir, exist_ok=True)
 				reliable_suffix = '_withinreliablevoxels' if within_reliable else ''
 				outfile = output_dir + f'sub-{sub_id}_searchlightRSA-{f_name}_radius-{radius}_stat-rmap{reliable_suffix}.nii.gz'
@@ -561,12 +559,18 @@ if __name__ == "__main__":
 	elif mode == "wholebrain_uniqvar":
 		radius = 3
 		# Model comparisons for unique variance RSA
-		comparisons = [('HR', 'ME10s_reduced'),]
+		comparisons = []
+		for pair in args.sr_comparisons:
+		    models = pair.split(',')
+		    if len(models) != 2:
+		        raise ValueError(f"Invalid comparison '{pair}'. Use format MODEL1,MODEL2")
+		    comparisons.append(tuple(models))
 
 		# Load data
 		beta_images, mask_images = get_wholebrain_neural_data(sub_ids, within_reliable)
 
 		for feature1, feature2 in comparisons:
+			print(feature1, feature2)
 			for sub_id in tqdm(sub_ids):
 				# Extract feature vectors for subject
 				f1_vec = comparison_rdms[feature1][sub_id] if isinstance(comparison_rdms[feature1], dict) else comparison_rdms[feature1]
@@ -583,7 +587,7 @@ if __name__ == "__main__":
 					sr2_map[x, y, z] = sr2
 
 				# Save NIfTI images
-				output_dir = f'../derivatives/nilearn_analysis/rsa/sub-{sub_id}/'
+				output_dir = f'../derivatives/analyses/rsa/sub-{sub_id}/'
 				os.makedirs(output_dir, exist_ok=True)
 				reliable_suffix = '_withinreliablevoxels' if within_reliable else ''
 				sr1_outfile = output_dir + f'sub-{sub_id}_searchlightRSA-{feature1}{feature2}_radius-{radius}_stat-srmap{reliable_suffix}.nii.gz'

@@ -5,8 +5,6 @@
 # as surface plots using Nilearn.
 
 from general_utils import plot_on_surf, get_grouped_wholebrainmap, plot_on_surf_z
-import numpy as np
-import pandas as pd
 import nibabel as nib
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -31,7 +29,7 @@ args = parser.parse_args()
 subj_group = "M"
 within_reliable = True
 radius = 3
-plot_dir = f'../derivatives/plots/rsa/group/'
+plot_dir = '../derivatives/analyses/plots/rsa/group/'
 
 thres = args.thres
 out_type = args.out_type
@@ -56,7 +54,7 @@ image_vectors = {}
 for f_name in tqdm(features2test):
     images = []
     for sub_id in sub_ids:
-        rsa_img = f'../derivatives/nilearn_analysis/rsa/sub-{sub_id}/sub-{sub_id}_searchlightRSA-{f_name}_radius-{radius}_stat-rmap{reliable_suffix}.nii.gz'
+        rsa_img = f'../derivatives/analyses/rsa/sub-{sub_id}/sub-{sub_id}_searchlightRSA-{f_name}_radius-{radius}_stat-rmap{reliable_suffix}.nii.gz'
         images.append(rsa_img)
 
     group_maps[f_name] = get_grouped_wholebrainmap(images, nonparametric=True, correction='fdr')
@@ -79,7 +77,7 @@ for pair in tqdm(diff_pairs):
     group_maps[pair] = get_grouped_wholebrainmap(diff_images, nonparametric=True, correction='fdr')
     image_vectors[pair] = diff_images
 
-print("Done calculating difference group maps for SocialGNN/SIMPLE!")
+print("Done calculating difference group maps!")
 
 # ==== STEP 3: Unique Variance (Semi-partial RSA) Group Maps ====
 sr_group_maps = {}
@@ -89,7 +87,7 @@ for feature1, feature2 in tqdm(sr_comparisons):
     images21 = []  # variance uniquely explained by feature2 (controlling for feature1)
 
     for sub_id in sub_ids:
-        output_dir = f'../derivatives/nilearn_analysis/rsa/sub-{sub_id}/'
+        output_dir = f'../derivatives/analyses/rsa/sub-{sub_id}/'
         sr1_img = output_dir + f'sub-{sub_id}_searchlightRSA-{feature1}{feature2}_radius-{radius}_stat-srmap{reliable_suffix}.nii.gz'
         sr2_img = output_dir + f'sub-{sub_id}_searchlightRSA-{feature2}{feature1}_radius-{radius}_stat-srmap{reliable_suffix}.nii.gz'
 
@@ -99,7 +97,7 @@ for feature1, feature2 in tqdm(sr_comparisons):
     sr_group_maps[(feature1, feature2)] = get_grouped_wholebrainmap(images12, nonparametric=True, correction='fdr')
     sr_group_maps[(feature2, feature1)] = get_grouped_wholebrainmap(images21, nonparametric=True, correction='fdr')
 
-print("Done calculating uniqvar group maps for SocialGNN/SIMPLE!")
+print("Done calculating uniqvar group maps!")
 
 # ==== STEP 4: Plotting All Maps ====
 print('Plotting now!')
@@ -127,7 +125,7 @@ for plot_style in plot_styles:
                 fig, _ = plot_on_surf_z(sr_group_maps[(fwd, rev)][out_type], thres=thres,vmax_inp=vmax)
             else:
                 fig, _ = plot_on_surf(sr_group_maps[(fwd, rev)][out_type],thres=thres,vmax_inp=vmax)
-            fig.suptitle(f"SR {fwd} controlling for {rev} (Group {out_type} map; thres=1.96)")
+            fig.suptitle(f"SR {fwd} controlling for {rev} (Group {out_type} map; thres={thres})")
             fig.savefig(plot_dir + f'standardrsa_uniqvar_{subj_group}groupmap_{fwd}controlling{rev}{reliable_suffix}_{out_type}_{thres}{plot_style_suffix}.png', bbox_inches='tight', dpi=600)
             plt.close(fig)
 
