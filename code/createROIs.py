@@ -261,7 +261,7 @@ class SubjROIs:
             except FileNotFoundError:
                 self.create_rois()
                 self.save_subjROIs()
-                print(f"{self.sub_id}: Created and saved ROIs (fallback)")
+                print(f"{self.sub_id}: Created and saved ROIs (no existing files found)")
 
     def create_rois(self, plot_mode=None):
         print(f"\n{self.sub_id}")
@@ -580,7 +580,7 @@ if __name__ == "__main__":
     os.makedirs(outdir, exist_ok=True)
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    make_roiwise_boxplot(split_half_r, sub_ids, plot_title="Split-Half Reliability Noise Ceiling Across ROIs", ax=ax)
+    make_roiwise_boxplot(split_half_r, sub_ids, plot_title="Split-Half Reliability", ax=ax)
     plt.ylabel('Pearson Correlation')
     ax.legend(bbox_to_anchor=(1.1, 1.05), loc="upper center")
     plt.savefig(f'{outdir}/roiwise_splithalfr_group{subj_group}.png', bbox_inches="tight", dpi=300)
@@ -588,14 +588,14 @@ if __name__ == "__main__":
 
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    make_roiwise_boxplot(split_half_rsa, sub_ids, plot_title=f"Split-Half RSA Noise Ceiling Across ROIs", ax=ax)
+    make_roiwise_boxplot(split_half_rsa, sub_ids, plot_title=f"Split-Half RSA", ax=ax)
     plt.ylabel('Spearman Correlation (b/w) RDMs')
     ax.legend(bbox_to_anchor=(1.1, 1.05), loc="upper center")
     plt.savefig(f'{outdir}/roiwise_splithalfrsa_group{subj_group}.png', bbox_inches="tight", dpi=300)
     plt.show()
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    make_roiwise_boxplot(split_half_rsa_withinreliable, sub_ids, plot_title=f"Split-Half RSA Noise Ceiling Across ROIs within Reliable", ax=ax)
+    make_roiwise_boxplot(split_half_rsa_withinreliable, sub_ids, plot_title=f"Split-Half RSA within Reliable", ax=ax)
     plt.ylabel('Spearman Correlation (b/w) RDMs')
     ax.legend(bbox_to_anchor=(1.1, 1.05), loc="upper center")
     plt.savefig(f'{outdir}/roiwise_splithalfrsa_withinreliable_group{subj_group}.png', bbox_inches="tight", dpi=300)

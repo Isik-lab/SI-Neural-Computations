@@ -1,12 +1,10 @@
 import numpy as np
 from scipy.stats import spearmanr
-import pingouin as pg
 import pandas as pd
 import nibabel as nib
 from nilearn import plotting, datasets, surface
 from nilearn.glm.second_level import SecondLevelModel
-from nilearn.plotting import plot_stat_map
-from nilearn.image import load_img, concat_imgs, math_img, new_img_like
+from nilearn.image import load_img, concat_imgs, new_img_like
 from scipy.stats import norm
 from statsmodels.stats.multitest import fdrcorrection
 import matplotlib.pyplot as plt
@@ -108,8 +106,8 @@ def get_rdm(repr_list, method="pearsonr", plot=False, plot_title=None):
         correlation_distances = np.round(1 - np.corrcoef(repr_list), 6)
         dist_matrix = correlation_distances
     elif method == "euclidean":
-        n, p = repr_array.shape
-        euclidean_distances = np.sqrt(((repr_array[:, np.newaxis, :] - repr_array[np.newaxis, :, :]) ** 2).sum(axis=2)) / np.sqrt(p)
+        n, p = repr_list.shape
+        euclidean_distances = np.sqrt(((repr_list[:, np.newaxis, :] - repr_list[np.newaxis, :, :]) ** 2).sum(axis=2)) / np.sqrt(p)
         dist_matrix = euclidean_distances
 
     rdm_vector = [dist_matrix[i, j] for i in range(dist_matrix.shape[0]) for j in range(dist_matrix.shape[1]) if i > j]
@@ -129,8 +127,8 @@ def load_reliability_mask(sub_id, space='MNI152NLin2009cAsym', p_thres=1, r_thre
     ref_img = nib.load(f'../derivatives/fmriprep/sub-{sub_id}/func/sub-{sub_id}_task-main_run-1_space-{space}_desc-preproc_bold.nii.gz')
     affine, header = ref_img.affine, ref_img.header
 
-    p_vals = nib.load(f'../derivatives/nilearn_analysis/reliability/sub-{sub_id}_task-main_space-{space}_desc-betas-fracridge_betasnormalize-True_stat-p_statmap.nii.gz').get_fdata()
-    r_vals = nib.load(f'../derivatives/nilearn_analysis/reliability/sub-{sub_id}_task-main_space-{space}_desc-betas-fracridge_betasnormalize-True_stat-r_statmap.nii.gz').get_fdata()
+    p_vals = nib.load(f'../derivatives/analyses/reliability/sub-{sub_id}_task-main_space-{space}_desc-betas-fracridge_betasnormalize-True_stat-p_statmap.nii.gz').get_fdata()
+    r_vals = nib.load(f'../derivatives/analyses/reliability/sub-{sub_id}_task-main_space-{space}_desc-betas-fracridge_betasnormalize-True_stat-r_statmap.nii.gz').get_fdata()
 
     reliability_mask = np.zeros_like(r_vals, dtype='int')
     reliability_mask[(r_vals > r_thres) & (~np.isnan(r_vals)) & (p_vals < p_thres)] = 1

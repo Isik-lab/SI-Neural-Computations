@@ -4,7 +4,6 @@
 # ---------------------------------
 
 /sub-*/
-/derivatives/
 /stimuli/
 
 /dataset_description.json
@@ -13,14 +12,12 @@
 /task-postscan_events.json
 
 /README_openneuro.md
+/derivatives/fmriprep/
+/derivatives/GLMsingle/
 /derivatives/localizer_parcelmaps/
 /derivatives/analyses/
-
-# ---------------------------------
-# Large derived model files
-# ---------------------------------
-
-/model_&_behavioural_representations/ME/motion_energies_test_middle10s
+# file too large so upload only zip version
+/derivatives/model_and_behavioural_representations/ME/motion_energies_test_middle10s 
 
 
 # ---------------------------------
