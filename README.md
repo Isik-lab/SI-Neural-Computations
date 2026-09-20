@@ -111,7 +111,7 @@ python standardRSA_plotWholebrainGroupMaps.py \
     --features2test HR SocialGNN10s_trained10s SIMPLE10s ME10s_reduced VisualRNN10s \
     --sr_comparisons SocialGNN10s_trained10s,SIMPLE10s
 ```
-
+---
 ## ⏱️ Time-resolved analyses
 
 Processed 2-second-chunk derivatives are provided, so the time-resolved analysis can be run directly:
@@ -126,8 +126,8 @@ To regenerate the 2-second-chunk derivatives, use:
 python preprocessing/glm_2schunks.py
 python process_betas_2schunks.py
 ```
-
-🔄 Optional: regenerate intermediate derivatives
+---
+## 🔄 Optional: regenerate intermediate derivatives
 
 To regenerate the processed betas and ROI/reliability derivatives from the released GLMsingle outputs:
 ```
@@ -138,7 +138,7 @@ ROI creation requires third-party parcel maps that are not included in this repo
 
 The expected filenames and directory structure are defined in ```createROIs.py.```
 
-
+---
 ## 📚 Supplementary Analyses
 Additional analyses reported in the Supplementary Information are in:
 
