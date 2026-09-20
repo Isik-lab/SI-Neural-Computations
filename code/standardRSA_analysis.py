@@ -30,6 +30,18 @@ def load_features(features2test = [], sub_ids = None):
 	# Each block below loads and organizes features in the order of video_names_inorder
 	features = {}
 
+	if 'ME10s' in features2test:
+	    with open("../derivatives/model_and_behavioural_representations/ME/motion_energies_test_middle10s", "rb") as f:
+	        motion_energies = pickle.load(f)
+
+	    motion_energies = {k[:23]:v for k,v in motion_energies.items()}
+
+	    motion_energy_avg = []
+	    for i,x in enumerate(video_names_inorder):
+	        temp = motion_energies[x[:23]]
+	        motion_energy_avg.append(np.mean(temp, 0))
+
+	    features['ME10s'] = np.array(motion_energy_avg)
 
 	if 'ME10s_reduced' in features2test:
 	    from sklearn.decomposition import PCA
