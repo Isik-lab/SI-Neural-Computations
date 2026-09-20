@@ -132,7 +132,7 @@ python process_betas_2schunks.py
 To regenerate the processed betas and ROI/reliability derivatives from the released GLMsingle outputs:
 ```
 python process_betas.py
-python createROIs.py
+python createROIs.py (change overwrite=True in code)
 ```
 ROI creation requires third-party parcel maps that are not included in this repository. Place them in: ```derivatives/localizer_parcelmaps/```
 
