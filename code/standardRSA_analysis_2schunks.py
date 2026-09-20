@@ -220,29 +220,16 @@ def get_interactioneffect(ax, df, roi_name="ROI"):
 	aov = pg.rm_anova(dv="r", within=["Chunk", "Feature"], subject="Sub_id", data=df, detailed=True)
 	print(aov.loc[aov['Source'] == "Chunk * Feature", ["Source", "ddof1", "ddof2", "F", "p-unc", "p-GG-corr"]])
 
-	'''
-	# Polynomial regression for each model
-	print(f"\n=== Quadratic Fit Coefficients: {roi_name} ===")
-	for model in df['Feature'].unique():
-	    subdf = df[df['Feature'] == model]
-	    model_fit = smf.ols("r ~ Chunk_num + I(Chunk_num**2)", data=subdf).fit()
-	    coef = model_fit.params
-	    pvals = model_fit.pvalues
-	    print(f"{model}: β1 (linear) = {coef['Chunk_num']:.4f} (p={pvals['Chunk_num']:.4f}), "
-	          f"β2 (quad) = {coef['I(Chunk_num ** 2)']:.4f} (p={pvals['I(Chunk_num ** 2)']:.4f})")
-	    # print(model_fit.summary())  # Uncomment if full output is needed
-	'''
-	df["t"] = df["Chunk_num"] - df["Chunk_num"].mean()  # anchor can be changed; mean is fine
+	df["t"] = df["Chunk_num"] - df["Chunk_num"].mean()  
 
 	print(f"\n=== MixedLM: do trends/shapes differ? {roi_name} ===")
 	fit = smf.mixedlm(
-		"r ~ Feature * t + Feature * I(t**2)",  # remove + Feature*I(t**2) if you only want linear
+		"r ~ Feature * t + Feature * I(t**2)",  
 		data=df,
 		groups=df["Sub_id"],
 		re_formula="~t"
 	).fit(reml=False, method="lbfgs")
 
-	# print just the interaction terms so the answer is obvious
 	print("\nTrend-difference terms to look at:")
 	for term in fit.pvalues.index:
 	    if ":t" in term or "I(t ** 2)" in term:
