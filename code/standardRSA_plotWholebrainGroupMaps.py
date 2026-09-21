@@ -21,7 +21,7 @@ parser.add_argument("--features2test", nargs="*", default=[])
 parser.add_argument("--diff_pairs", nargs="*", default=[],
                     help="Format: feature1,feature2")
 parser.add_argument("--sr_comparisons", nargs="*",
-                    default=["SocialGNN10s_trained10s,SIMPLE10s"],
+                    default=[],
                     help="Format: feature1,feature2")
 
 args = parser.parse_args()
