@@ -156,8 +156,14 @@ class SubTrialsProcessor:
 
         even, odd = [], []
 
+        # Match historical reliability: attention checks are not experimental videos.
+        # Keep the full trial set unchanged for beta normalization and other outputs.
+        trials_df = self.trials_df
+        if self.task == "main":
+            trials_df = trials_df[trials_df["trial_type"] == "experimental_trial"]
+
         # Split trials into even and odd for each video (identifier)
-        for video, group in self.trials_df.groupby('identifier'):
+        for video, group in trials_df.groupby('identifier'):
             group = group.reset_index(drop=True)
             if len(group) > 1:
                 odd_rows = group[group.index % 2 != 0]

@@ -122,7 +122,9 @@ class SubTrialsProcessor:
         even, odd = [], []
 
         # Split trials into even and odd for each video (identifier)
-        for video, group in self.trials_df.groupby('identifier'):
+        # Use the same experimental-only reliability definition as the full trials.
+        trials_df = self.trials_df[self.trials_df["trial_type"] == "experimental_trial"]
+        for video, group in trials_df.groupby('identifier'):
             group = group.reset_index(drop=True)
             if len(group) > 1:
                 odd_rows = group[group.index % 2 != 0]
